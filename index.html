@@ -47,22 +47,37 @@
   <p id="status"></p>
 
   <script>
-    async function connectWallet() {
-      if (window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-          const walletAddress = accounts[0];
-          document.getElementById("status").innerText = "Connected: " + walletAddress;
+  async function connectWallet() {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-          // ✅ Redirect to your FlutterFlow app with wallet address as URL param
-          window.location.href = `https://realestate-1cooq0.flutterflow.app/?walletAddress=${walletAddress}`;
-        } catch (error) {
-          document.getElementById("status").innerText = "Error: " + error.message;
-        }
-      } else {
-        document.getElementById("status").innerText = "MetaMask not detected. Please install it from https://metamask.io";
+    if (typeof window.ethereum !== 'undefined') {
+      // Desktop MetaMask
+      try {
+        const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+        const walletAddress = accounts[0];
+
+        document.getElementById("status").innerText = "Connected: " + walletAddress;
+
+        // Pass back to FlutterFlow or deep link
+        window.ReactNativeWebView?.postMessage(walletAddress);
+        window.parent.postMessage(walletAddress, "*");
+
+        // Optional deep link
+        window.location.href = `realestate://realestate.com/HomePage?wallet=${walletAddress}`;
+      } catch (error) {
+        document.getElementById("status").innerText = "Error: " + error.message;
       }
+    } else if (isMobile) {
+      // Mobile MetaMask redirect
+      const dappUrl = encodeURIComponent("realestate-1cooq0.flutterflow.app/metamask.html"); // Your GitHub or FF-hosted URL
+      const metamaskDeepLink = `https://metamask.app.link/dapp/${dappUrl}`;
+      window.location.href = metamaskDeepLink;
+    } else {
+      document.getElementById("status").innerText =
+        "MetaMask not installed. Please install it from https://metamask.io";
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
