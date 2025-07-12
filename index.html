@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Connect MetaMask Wallet</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       font-family: Arial, sans-serif;
+      padding: 20px;
       text-align: center;
-      padding: 40px;
-      background-color: #f8f8f8;
+      background: #f7f7f7;
     }
 
     h2 {
@@ -16,23 +18,22 @@
     }
 
     button {
-      background-color: #ff8f00;
-      color: white;
-      border: none;
-      padding: 15px 25px;
+      padding: 12px 24px;
       font-size: 16px;
-      cursor: pointer;
+      background-color: #f6851b;
+      border: none;
+      color: white;
       border-radius: 8px;
+      cursor: pointer;
     }
 
     button:hover {
-      background-color: #e67e00;
+      background-color: #e2761b;
     }
 
     #status {
       margin-top: 20px;
-      color: #444;
-      font-size: 16px;
+      font-weight: bold;
     }
   </style>
 
@@ -42,29 +43,23 @@
         try {
           const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
           const walletAddress = accounts[0];
-
-          // ✅ Post message to Flutter via JavaScriptChannel
-          if (window.WalletChannel) {
-            window.WalletChannel.postMessage(walletAddress);  // Flutter WebView channel
-          }
-
-          // Fallback for WebView on mobile browser
-          window.ReactNativeWebView?.postMessage(walletAddress);
-          window.parent?.postMessage(walletAddress, "*");
-
           document.getElementById("status").innerText = "Connected: " + walletAddress;
+
+          // Send the wallet address to Flutter using the WalletChannel
+          if (window.WalletChannel && window.WalletChannel.postMessage) {
+            WalletChannel.postMessage(walletAddress);
+          }
         } catch (error) {
           document.getElementById("status").innerText = "Error: " + error.message;
         }
       } else {
-        document.getElementById("status").innerText = "MetaMask not detected. Install from metamask.io";
+        document.getElementById("status").innerText = "MetaMask not installed. Visit https://metamask.io";
       }
     }
   </script>
 </head>
-
 <body>
-  <h2>Connect Your MetaMask Wallet</h2>
+  <h2>Connect Your Wallet</h2>
   <button onclick="connectWallet()">Connect Wallet</button>
   <p id="status"></p>
 </body>
