@@ -1,48 +1,38 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Connect MetaMask</title>
+  <meta charset="UTF-8">
+  <title>Connect MetaMask Wallet</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom, #f0f0f0, #e2e8f0);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f8f8f8;
     }
 
     h2 {
-      color: #2d3748;
-      margin-bottom: 20px;
+      color: #333;
     }
 
     button {
-      background-color: #f6851b;
+      background-color: #ff8f00;
       color: white;
-      font-size: 18px;
-      padding: 12px 24px;
       border: none;
-      border-radius: 8px;
+      padding: 15px 25px;
+      font-size: 16px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      border-radius: 8px;
     }
 
     button:hover {
-      background-color: #e2761b;
+      background-color: #e67e00;
     }
 
-    p#status {
+    #status {
       margin-top: 20px;
+      color: #444;
       font-size: 16px;
-      color: #2d3748;
-      text-align: center;
-      word-break: break-word;
     }
   </style>
 
@@ -50,25 +40,31 @@
     async function connectWallet() {
       if (window.ethereum) {
         try {
-          const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
           const walletAddress = accounts[0];
 
-          // Send wallet address back to FlutterFlow
-          window.ReactNativeWebView?.postMessage(walletAddress); // Mobile
-          window.parent.postMessage(walletAddress, "*");          // Web fallback
+          // ✅ Post message to Flutter via JavaScriptChannel
+          if (window.WalletChannel) {
+            window.WalletChannel.postMessage(walletAddress);  // Flutter WebView channel
+          }
+
+          // Fallback for WebView on mobile browser
+          window.ReactNativeWebView?.postMessage(walletAddress);
+          window.parent?.postMessage(walletAddress, "*");
 
           document.getElementById("status").innerText = "Connected: " + walletAddress;
         } catch (error) {
           document.getElementById("status").innerText = "Error: " + error.message;
         }
       } else {
-        document.getElementById("status").innerText = "MetaMask not installed.";
+        document.getElementById("status").innerText = "MetaMask not detected. Install from metamask.io";
       }
     }
   </script>
 </head>
+
 <body>
-  <h2>Connect to MetaMask</h2>
+  <h2>Connect Your MetaMask Wallet</h2>
   <button onclick="connectWallet()">Connect Wallet</button>
   <p id="status"></p>
 </body>
